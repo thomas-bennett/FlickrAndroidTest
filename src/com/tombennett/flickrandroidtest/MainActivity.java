@@ -1,6 +1,7 @@
 package com.tombennett.flickrandroidtest;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -36,6 +37,15 @@ public class MainActivity extends Activity {
     }
 
     private class GetInterestingPhotosClass extends AsyncTask<Void, Void, PhotoList> {
+        private ProgressDialog mProgressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            mProgressDialog = new ProgressDialog(MainActivity.this);
+            mProgressDialog.setTitle("Loading");
+            mProgressDialog.setMessage("Loading interesting images");
+            mProgressDialog.show();
+        }
 
         @Override
         protected PhotoList doInBackground(Void... params) {
@@ -52,6 +62,8 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onPostExecute(PhotoList photoList) {
+            mProgressDialog.dismiss();
+
             if (photoList != null) {
                 Activity activity = MainActivity.this;
                 FlickrImageAdapter adapter = new FlickrImageAdapter(activity, photoList);
