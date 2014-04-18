@@ -5,16 +5,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.widget.GridView;
 
 import com.gmail.yuyang226.flickr.Flickr;
 import com.gmail.yuyang226.flickr.interestingness.InterestingnessInterface;
-import com.gmail.yuyang226.flickr.photos.Photo;
 import com.gmail.yuyang226.flickr.photos.PhotoList;
 
 public class MainActivity extends Activity {
-    // TODO: Move to resources
-    final private static String flickrApiKey = "86bad3670fcd1c5966036d3159252889";
-    private static final String TAG = "FlickrAndroidTest";
 
     private Flickr mFlickr;
 
@@ -22,8 +19,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        mFlickr = new Flickr(flickrApiKey);
+        mFlickr = new Flickr(Constants.FLICKR_API_KEY);
     }
 
     @Override
@@ -48,7 +44,7 @@ public class MainActivity extends Activity {
             try {
                 return interestingInterface.getList();
             } catch (Exception exception) {
-                Log.e(TAG, exception.getMessage());
+                Log.e(Constants.TAG, exception.getMessage());
             }
 
             return null;
@@ -57,10 +53,10 @@ public class MainActivity extends Activity {
         @Override
         protected void onPostExecute(PhotoList photoList) {
             if (photoList != null) {
-                for (Photo photo : photoList) {
-                    final String title = (photo.getTitle() == null) ? "No Title" : photo.getTitle();
-                    Log.d(TAG, String.format("Title: %s, Url: %s", title, photo.getUrl()));
-                }
+                Activity activity = MainActivity.this;
+                FlickrImageAdapter adapter = new FlickrImageAdapter(activity, photoList);
+                GridView gridView = (GridView) activity.findViewById(R.id.gridview);
+                gridView.setAdapter(adapter);
             }
         }
 
