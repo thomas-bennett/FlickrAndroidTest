@@ -60,6 +60,8 @@ public class FlickrImageAdapter extends BaseAdapter {
             public void onClick(View view) {
                 Intent intent = new Intent(mContext, ImageActivity.class);
                 intent.putExtra(ImageActivity.INTENT_KEY_PHOTO_ID, photo.getId());
+                intent.putExtra(ImageActivity.INTENT_KEY_PHOTO_SECRET, photo.getSecret());
+                intent.putExtra(ImageActivity.INTENT_KEY_PHOTO_TITLE, photo.getTitle());
                 mContext.startActivity(intent);
             }
 

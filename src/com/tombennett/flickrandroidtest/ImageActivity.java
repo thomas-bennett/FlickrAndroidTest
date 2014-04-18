@@ -20,22 +20,33 @@ import com.gmail.yuyang226.flickr.photos.Size;
 public class ImageActivity extends Activity {
 
     public static final String INTENT_KEY_PHOTO_ID = "com.tombennett.flickrandroidtest.ImageActivity.photo_id";
+    public static final String INTENT_KEY_PHOTO_SECRET = "com.tombennett.flickrandroidtest.ImageActivity.photo_secret";
+    public static final String INTENT_KEY_PHOTO_TITLE = "com.tombennett.flickrandroidtest.ImageActivity.photo_title";
+
     private Photo mPhoto;
     private DownloadPhotoTask mDownloadPhotoTask;
+    private String mPhotoTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image);
 
-        ActionBar actionBar = getActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-
         Intent intent = getIntent();
         String photoId = intent.getStringExtra(INTENT_KEY_PHOTO_ID);
         assert (photoId != null);
+        // Optional
+        String photoSecret = intent.getStringExtra(INTENT_KEY_PHOTO_SECRET);
+        mPhotoTitle = intent.getStringExtra(INTENT_KEY_PHOTO_TITLE);
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        if (!Utils.isEmpty(mPhotoTitle)) {
+            actionBar.setTitle(mPhotoTitle);
+        }
+
         mDownloadPhotoTask = new DownloadPhotoTask(this);
-        mDownloadPhotoTask.execute(photoId);
+        mDownloadPhotoTask.execute(photoId, photoSecret);
     }
 
     @Override
@@ -56,7 +67,8 @@ public class ImageActivity extends Activity {
         protected void onPreExecute() {
             mProgressDialog = new ProgressDialog(mActivity);
             mProgressDialog.setTitle("Loading");
-            mProgressDialog.setMessage("Wait while loading...");
+            String imageTitle = (Utils.isEmpty(mPhotoTitle)) ? "image" : mPhotoTitle;
+            mProgressDialog.setMessage(String.format("Loading %s ...", imageTitle));
             mProgressDialog.show();
         }
 
@@ -67,11 +79,14 @@ public class ImageActivity extends Activity {
 
             try {
                 String photoId = params[0];
+                String photoSecret = params[1];
                 Flickr flickr = new Flickr(Constants.FLICKR_API_KEY);
                 PhotosInterface photosInterface = flickr.getPhotosInterface();
-                mPhoto = photosInterface.getPhoto(photoId);
 
-                Log.d(Constants.TAG, "Need to get data for " + mPhoto.getTitle());
+                mPhoto = photosInterface.getPhoto(photoId, photoSecret);
+                mPhotoTitle = mPhoto.getTitle();
+
+                Log.d(Constants.TAG, "Fetching data for " + mPhotoTitle);
                 photosInterface.getImageAsStream(mPhoto, Size.ORIGINAL);
                 InputStream inputStream = photosInterface.getImageAsStream(mPhoto, Size.LARGE);
                 return Drawable.createFromStream(inputStream, photoId);
@@ -87,11 +102,11 @@ public class ImageActivity extends Activity {
         protected void onPostExecute(Drawable drawable) {
             mProgressDialog.dismiss();
 
-            getActionBar().setTitle(mPhoto.getTitle());
-
             if (drawable != null) {
                 ImageView imageView = (ImageView) mActivity.findViewById(R.id.image);
                 imageView.setImageDrawable(drawable);
+                getActionBar().setTitle(mPhotoTitle);
+                imageView.setContentDescription(mPhotoTitle);
             }
         }
     }
