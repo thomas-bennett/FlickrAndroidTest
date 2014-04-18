@@ -4,5 +4,5 @@
     <string name="app_name">FlickrAndroidTest</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-
+    <string name="image_description_standin">Flickr image. Details filled in after load.</string>
 </resources>
